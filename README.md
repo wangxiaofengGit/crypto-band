@@ -1,5 +1,5 @@
 # crypto-bank
-A minimal example to get started with Ethereum smart contract development 
+A minimal example to get started with Ethereum smart contract development  
 一个极简的例子入门以太坊智能合约开发 
 
 ## Directory Structure
