@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Bank Contract Demo</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+</head>
+<body>
+    <h1>Simple Bank Contract Demo</h1>
+
+    <div>
+        <h2>Deposit</h2>
+        <input type="number" id="depositAmount" placeholder="Amount in ETH" />
+        <button onclick="deposit()">Deposit</button>
+    </div>
+
+    <div>
+        <h2>Withdraw</h2>
+        <input type="number" id="withdrawAmount" placeholder="Amount in ETH" />
+        <button onclick="withdraw()">Withdraw</button>
+    </div>
+
+    <div>
+        <h2>Check Balance</h2>
+        <button onclick="checkBalance()">Check Balance</button>
+        <p>Your balance: <span id="balanceDisplay">-</span> ETH</p>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        // you can apply project id in infura platform and deploy use your contract address 
+        const YOUR_INFURA_PROJECT_ID = '0ada8e8192c9466487df7e0136dff6d1'
+        const YOUR_CONTRACT_ADDRESS = '0xeb86a1a6195123dfd321f50f82c2e982717cdbe4'
+
+        const provider = new ethers.providers.JsonRpcProvider('https://sepolia.infura.io/v3/'+YOUR_INFURA_PROJECT_ID);
+        const contractAddress = YOUR_CONTRACT_ADDRESS; 
+        const contractABI = [
+            {
+                "inputs": [],
+                "name": "deposit",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "withdraw",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getBalance",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        const contract = new ethers.Contract(contractAddress, contractABI, provider);
+        let signer;
+
+        async function connectWallet() {
+            await ethereum.request({ method: 'eth_requestAccounts' });
+            const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = web3Provider.getSigner();
+        }
+        connectWallet();
+
+        async function deposit() {
+            const amount = document.getElementById('depositAmount').value;
+            if (!amount || isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount in ETH");
+                return;
+            }
+            try {
+                const contractWithSigner = contract.connect(signer);
+                const tx = await contractWithSigner.deposit({ value: ethers.utils.parseEther(amount) });
+                await tx.wait();
+                document.getElementById('result').innerText = "Deposit successful!";
+            } catch (error) {
+                console.error('Error making deposit:', error);
+                document.getElementById('result').innerText = 'Error making deposit. Please check the console for details.';
+            }
+        }
+
+        async function withdraw() {
+            const amount = document.getElementById('withdrawAmount').value;
+            if (!amount || isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount in ETH");
+                return;
+            }
+            try {
+                const contractWithSigner = contract.connect(signer);
+                const tx = await contractWithSigner.withdraw(ethers.utils.parseEther(amount));
+                await tx.wait();
+                document.getElementById('result').innerText = "Withdrawal successful!";
+            } catch (error) {
+                console.error('Error making withdrawal:', error);
+                document.getElementById('result').innerText = 'Error making withdrawal. Please check the console for details.';
+            }
+        }
+
+        async function checkBalance() {
+            try {
+                const contractWithSigner = contract.connect(signer);
+                const balance = await contractWithSigner.getBalance();
+                const balanceInEth = ethers.utils.formatUnits(balance, 'ether');
+                const formattedBalance = parseFloat(balanceInEth).toFixed(9);
+                document.getElementById('balanceDisplay').innerText = formattedBalance + " ETH";
+            } catch (error) {
+                console.error('Error checking balance:', error);
+                document.getElementById('result').innerText = 'Error checking balance. Please check the console for details.';
+            }
+        }
+    </script>
+</body>
+</html>
