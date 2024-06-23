@@ -18,6 +18,7 @@ npm start
 ## Development environment related and step
 Metamask: you can install in the chrome store  
 create a account，and then chose the test network like sepolia  
+get test token https://cloud.google.com/application/web3/faucet/ethereum/sepolia  
 Remix: https://remix.ethereum.org/   -- for the contract deploy  
 infura: https://www.infura.io/       -- third-party API platform for page to link and use contract
 
